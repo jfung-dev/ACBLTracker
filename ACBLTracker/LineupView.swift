@@ -216,6 +216,7 @@ struct LineupRow: View {
                 HStack(spacing: 5) {
                     PlayerName(name: player.name)
                     if injury != nil { InjuryMark() }
+                    SeasonPPG(espnID: player.espnID)
                 }
                 HStack(spacing: 6) {
                     PositionPill(position: player.position)
@@ -364,7 +365,7 @@ struct LineupView: View {
             .sensoryFeedback(.selection, trigger: selected)
             .refreshable {
                 // Run in its own task so a SwiftUI redraw mid-pull can't cancel the network calls.
-                await Task { await week.refresh() }.value
+                await Task { await week.refreshAll() }.value
             }
             .alert("Can't swap those", isPresented: $showSwapError) {
                 Button("OK", role: .cancel) {}
