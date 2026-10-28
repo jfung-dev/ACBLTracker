@@ -11,6 +11,22 @@ struct PlayerDetailView: View {
 
     @State private var recent: [RecentGame]?
     @State private var recentFailed = false
+    /// Full box scores keyed by ESPN event id, one per counting game that has started.
+    @State private var boxes: [String: FullBox] = [:]
+    @State private var boxFailed: Set<String> = []
+    /// Games already fetched after going final, so a finished game isn't fetched again.
+    @State private var finalLoaded: Set<String> = []
+
+    /// One of his two counting games, once it has started (live or final).
+    private func startedLine(_ g: Int) -> GameLine? {
+        guard let line = week.results?.line(for: player.id, game: g), line.state != .scheduled else { return nil }
+        return line
+    }
+
+    /// Changes when a game starts, or goes from live to final, which restarts the box score task.
+    private var boxTaskKey: String {
+        (0..<2).map { g in startedLine(g).map { "\($0.eventID)-\($0.state)" } ?? "-" }.joined(separator: "|")
+    }
 
     var body: some View {
         let display = directory.display(for: player)
@@ -35,8 +51,11 @@ struct PlayerDetailView: View {
 
                 Section("Your lineup") { lineupRows }
 
-                gameSection(0)
+                // Newest first. Each game is followed by its own box score.
                 gameSection(1)
+                boxScoreSection(1)
+                gameSection(0)
+                boxScoreSection(0)
 
                 recentSection
 
@@ -57,6 +76,8 @@ struct PlayerDetailView: View {
                 ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } }
             }
             .task { await loadRecent() }
+            // Restarts when a game starts or ends. Polls only while a game is live, and stops when the sheet closes.
+            .task(id: boxTaskKey) { await loadBoxes() }
         }
         .presentationDetents([.medium, .large])
     }
@@ -186,6 +207,70 @@ struct PlayerDetailView: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    // MARK: Box score
+
+    /// The whole game's box score, both teams, for one of his counting games once it has started. Live or final.
+    @ViewBuilder
+    private func boxScoreSection(_ g: Int) -> some View {
+        if let line = startedLine(g) {
+            Section {
+                if let box = boxes[line.eventID] {
+                    LiveBoxScoreView(
+                        box: box,
+                        highlightID: player.espnID,
+                        teamID: player.espnID.flatMap { directory.player(id: $0)?.teamID }
+                    )
+                    .listRowInsets(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+                } else if boxFailed.contains(line.eventID) {
+                    Text("Couldn't load the box score").foregroundStyle(.secondary)
+                } else {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("Loading...").foregroundStyle(.secondary)
+                    }
+                }
+            } header: {
+                HStack {
+                    Text("BOX SCORE - \(line.opponent)")
+                    Spacer()
+                    Text(line.statusText).foregroundStyle(line.state == .live ? Color.green : Color.secondary)
+                }
+            }
+        }
+    }
+
+    /// Loads the box score for each started game. A final game is fetched once. A live game refreshes every
+    /// 20 seconds (one ESPN call per live game) until it ends. Stops by itself when the sheet closes.
+    private func loadBoxes() async {
+        while !Task.isCancelled {
+            let lines = (0..<2).compactMap { startedLine($0) }
+            let anyLive = lines.contains { $0.state == .live }
+            let finalIDs = Set(lines.filter { $0.state == .final }.map { $0.eventID })
+            let toFetch = Set(lines.filter { $0.state == .live || !finalLoaded.contains($0.eventID) }.map { $0.eventID })
+
+            let fetched = await withTaskGroup(of: (String, FullBox?).self) { group -> [String: FullBox?] in
+                for id in toFetch {
+                    group.addTask { (id, try? await ESPNClient.shared.fullBoxscore(eventID: id)) }
+                }
+                var out: [String: FullBox?] = [:]
+                for await (id, result) in group { out[id] = result }
+                return out
+            }
+            if Task.isCancelled { return }
+            for (id, result) in fetched {
+                if let box = result {
+                    boxes[id] = box
+                    boxFailed.remove(id)
+                    if finalIDs.contains(id) { finalLoaded.insert(id) }
+                } else if boxes[id] == nil {
+                    boxFailed.insert(id)   // a failed refresh keeps the last box score on screen
+                }
+            }
+            guard anyLive else { return }
+            try? await Task.sleep(for: .seconds(20))
+        }
     }
 
     // MARK: Recent form
