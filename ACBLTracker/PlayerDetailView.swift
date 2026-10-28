@@ -49,6 +49,20 @@ struct PlayerDetailView: View {
                     .padding(.vertical, 4)
                 }
 
+                if let injury = week.injury(for: player), injury.hasDrillDown {
+                    Section {
+                        NavigationLink {
+                            InjuryDetailView(playerName: player.name, injury: injury)
+                        } label: {
+                            HStack {
+                                Text("Injury details")
+                                Spacer()
+                                Text(injury.status).foregroundStyle(.red).font(.subheadline.weight(.semibold))
+                            }
+                        }
+                    }
+                }
+
                 Section("Your lineup") { lineupRows }
 
                 // Newest first. Each game is followed by its own box score.
