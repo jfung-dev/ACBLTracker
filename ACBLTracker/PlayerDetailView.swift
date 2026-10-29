@@ -1,12 +1,11 @@
 import SwiftUI
 
-/// Tap a player on the Lineup tab: where he sits, his next game, the stat line for each of his two counting games,
+/// Tap a player on the Lineup tab: the stat line for each of his two counting games,
 /// how each one scored, and how he's played lately.
 struct PlayerDetailView: View {
     let player: RosterPlayer
     @EnvironmentObject var week: WeekStore
     @EnvironmentObject var directory: PlayerDirectory
-    @EnvironmentObject var lineupStore: LineupStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var recent: [RecentGame]?
@@ -63,8 +62,6 @@ struct PlayerDetailView: View {
                     }
                 }
 
-                Section("Your lineup") { lineupRows }
-
                 // Newest first. Each game is followed by its own box score.
                 gameSection(1)
                 boxScoreSection(1)
@@ -94,57 +91,6 @@ struct PlayerDetailView: View {
             .task(id: boxTaskKey) { await loadBoxes() }
         }
         .presentationDetents([.medium, .large])
-    }
-
-    // MARK: Your lineup
-
-    @ViewBuilder
-    private var lineupRows: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text("Slot")
-            Spacer()
-            Text(slotText).foregroundStyle(.secondary).multilineTextAlignment(.trailing)
-        }
-        if let note = week.regretNote(for: player.id) {
-            Text(note).font(.subheadline.weight(.semibold)).foregroundStyle(.orange)
-        }
-        if let next = nextGameText {
-            HStack(alignment: .firstTextBaseline) {
-                Text("Next game")
-                Spacer()
-                Text(next).foregroundStyle(.secondary).multilineTextAlignment(.trailing)
-            }
-        }
-    }
-
-    private var slotText: String {
-        guard let slot = lineupStore.lineup.slot(of: player.id) else { return "Not on this week's lineup" }
-        switch slot {
-        case .starter(let i):
-            return "Starter at \(Lineup.starterPositions[i].rawValue) - full points and bonus"
-        case .bench(let i):
-            return "Bench, sub #\(i + 1) - half points when he plays"
-        case .deep(let i):
-            return "Deep bench, sub #\(i + 4) - counts only if a sub ahead of him sits"
-        }
-    }
-
-    /// The first of his two counting games that hasn't finished.
-    private var nextGameText: String? {
-        var sawGame = false
-        for g in 0..<2 {
-            guard let line = week.results?.line(for: player.id, game: g) else { continue }
-            sawGame = true
-            switch line.state {
-            case .live:
-                return "\(line.opponent) - live now"
-            case .scheduled:
-                return "\(line.opponent) - " + line.date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
-            case .final:
-                continue
-            }
-        }
-        return sawGame ? "Both counting games are done" : nil
     }
 
     // MARK: One game
