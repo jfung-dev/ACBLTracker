@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// One player cell from a weekly tab of the league sheet, e.g. "G - SGA (OKC)" or "N. Jokić - DEN - C".
 struct SheetCell: Equatable {
@@ -179,6 +180,7 @@ enum LeagueSheet {
 
     /// The week whose lineups are the ones to look at. Lineups are due Tuesday 1 pm PT and the sheet is
     /// filled in by 5 pm PT, so each new week's tab takes over then and not at midnight.
+    @MainActor
     static func activeWeek(now: Date = Date()) -> ActiveWeek {
         var start = ET.weekStart(containing: now)
         if now < rollover(forWeekStarting: start) { start = ET.addDays(-7, to: start) }

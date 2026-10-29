@@ -1,6 +1,7 @@
 import XCTest
 @testable import ACBLTracker
 
+@MainActor
 final class LeagueSheetTests: XCTestCase {
     private func player(_ name: String, _ team: String) -> DirectoryPlayer {
         DirectoryPlayer(id: name, name: name, teamID: team, teamAbbr: team, position: "PG", headshot: nil)
