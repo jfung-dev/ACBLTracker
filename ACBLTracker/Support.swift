@@ -94,6 +94,8 @@ enum TeamAlias {
     private static let map = [
         "GSW": "GS", "NYK": "NY", "NOP": "NO", "SAS": "SA",
         "UTH": "UTAH", "UTA": "UTAH", "WAS": "WSH", "PHO": "PHX",
+        // Spellings people use in the league sheet.
+        "PDX": "POR", "PORT": "POR", "WDC": "WSH", "PHIL": "PHI", "CHLT": "CHA",
     ]
     static func canon(_ s: String) -> String {
         let u = s.uppercased()

@@ -23,7 +23,7 @@ private struct KeyOut: Identifiable {
     let injury: Injury
 }
 
-/// Every NBA player who isn't on a league team's lineup this week (or on yours), best scorer first.
+/// Every NBA player who isn't on a league team's lineup in the active week's sheet tab (or on yours), best scorer first.
 /// Tap a player to add him with the usual Add player sheet.
 struct FreeAgentsView: View {
     @EnvironmentObject var directory: PlayerDirectory
@@ -40,6 +40,8 @@ struct FreeAgentsView: View {
     @State private var positions: [String: Position] = [:]
     @State private var onlyKeyTeammateOut = false
     @StateObject private var averages = SeasonAverages()
+    @StateObject private var sheet = LeagueSheetStore()
+    @State private var showingLink = false
 
     /// A teammate counts as a key scorer at this many points per game (this season, or last season until he has played).
     private static let keyScorerPPG = 15.0
@@ -149,6 +151,7 @@ struct FreeAgentsView: View {
             .refreshable {
                 await directory.load(force: true)
                 await directory.loadInjuries(force: true)
+                await sheet.load(force: true)
                 recompute()
                 // Don't hold the pull-to-refresh spinner for the whole PPG reload; the tab shows its own progress.
                 let ids = pool.map(\.id)
@@ -156,6 +159,7 @@ struct FreeAgentsView: View {
                 Task { await averages.load(ids: ids, injuredIDs: injured, force: true) }
             }
             .task(id: directory.players.count) {
+                await sheet.load()
                 await directory.loadInjuries()
                 recompute()
                 await averages.load(ids: pool.map(\.id), injuredIDs: outIDs)
@@ -164,6 +168,21 @@ struct FreeAgentsView: View {
             .onChange(of: averages.previous) { _, _ in recomputeOut() }
             .onChange(of: directory.injuries.count) { _, _ in recomputeOut() }
             .onChange(of: lineupStore.snapshots) { _, _ in recompute() }
+            .onChange(of: sheet.revision) { _, _ in recompute() }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showingLink = true } label: { Image(systemName: "link") }
+                        .accessibilityLabel("League sheet link")
+                }
+            }
+            .sheet(isPresented: $showingLink, onDismiss: {
+                Task {
+                    await sheet.load(force: true)
+                    recompute()
+                }
+            }) {
+                LeagueSheetLinkView()
+            }
             .sheet(item: $adding) { p in
                 AddPlayerView(player: p)
             }
@@ -174,28 +193,48 @@ struct FreeAgentsView: View {
 
     @ViewBuilder
     private var statusSection: some View {
-        if let key = taken.weekKey, let sheet = taken.sheet {
-            if key == LineupStore.currentWeekKey {
-                Section {
-                    Label("Rosters from the \(sheet) tab of the league sheet", systemImage: "checkmark.circle")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+        let week = LeagueSheet.activeWeek()
+        switch sheet.status {
+        case .live(let tab, let count):
+            note("Live from the \(tab) tab of the league sheet (\(count) players)", systemImage: "checkmark.circle", warn: false)
+        case .saved(let tab, let date, let reason):
+            note("\(reason) Using the \(tab) copy saved \(date.formatted(.relative(presentation: .named))).", systemImage: "exclamationmark.triangle.fill", warn: true)
+        case .older(let tab, let reason):
+            note("\(reason) Using the \(tab) tab instead, so this list may be a week behind.", systemImage: "exclamationmark.triangle.fill", warn: true)
+        case .idle, .loading:
+            Section {
+                HStack(spacing: 8) {
+                    ProgressView()
+                    Text("Reading the \(week.tab) tab...").font(.footnote).foregroundStyle(.secondary)
                 }
+            }
+        case .noLink, .unavailable:
+            bundledNote(week: week)
+        }
+    }
+
+    @ViewBuilder
+    private func bundledNote(week: LeagueSheet.ActiveWeek) -> some View {
+        let linked: Bool = { if case .unavailable = sheet.status { return true } else { return false } }()
+        let why: String = { if case .unavailable(let r) = sheet.status { return r + " " } else { return "" } }()
+        if let tab = taken.sheet {
+            if tab == week.tab && !linked {
+                note("Using the bundled \(tab) rosters. Tap the link button and paste your league sheet's link so each new week loads on its own.", systemImage: "info.circle", warn: false)
+            } else if tab == week.tab {
+                note("\(why)Using the bundled \(tab) rosters.", systemImage: "exclamationmark.triangle.fill", warn: true)
             } else {
-                Section {
-                    Label("These rosters are from the \(sheet) tab, not this week. Add this week to LeagueRosters.json so the list is right.",
-                          systemImage: "exclamationmark.triangle.fill")
-                        .font(.footnote)
-                        .foregroundStyle(.orange)
-                }
+                note("\(why)The bundled rosters are from \(tab), but \(week.tab) is the week to look at. Tap the link button to read it from the sheet.", systemImage: "exclamationmark.triangle.fill", warn: true)
             }
         } else {
-            Section {
-                Label("No league rosters are bundled, so only your own players are left out.",
-                      systemImage: "exclamationmark.triangle.fill")
-                    .font(.footnote)
-                    .foregroundStyle(.orange)
-            }
+            note("\(why)No league rosters are available, so only your own players are left out. Tap the link button to read them from the sheet.", systemImage: "exclamationmark.triangle.fill", warn: true)
+        }
+    }
+
+    private func note(_ text: String, systemImage: String, warn: Bool) -> some View {
+        Section {
+            Label(text, systemImage: systemImage)
+                .font(.footnote)
+                .foregroundStyle(warn ? Color.orange : Color.secondary)
         }
     }
 
@@ -212,7 +251,7 @@ struct FreeAgentsView: View {
                     }
                 }
             } footer: {
-                Text("If ESPN lists any of them, they show above as free agents. Fix the spelling in LeagueRosters.json.")
+                Text("If ESPN lists any of them, they show above as free agents. Check how they are spelled in the sheet.")
             }
         }
     }
@@ -309,12 +348,15 @@ struct FreeAgentsView: View {
     @MainActor
     private func recompute() {
         recomputeOut()
-        let weekKey = LineupStore.currentWeekKey
-        let result = rosters.taken(
-            weekKey: weekKey,
-            directory: directory,
-            own: lineupStore.resolvedLineup(for: weekKey)
-        )
+        let week = LeagueSheet.activeWeek()
+        let own = lineupStore.resolvedLineup(for: week.key)
+        var result: TakenPlayers
+        if let snap = sheet.snapshot {
+            result = LeagueSheet.taken(cells: snap.cells, directory: directory, own: own)
+            result.sheet = snap.tab
+        } else {
+            result = rosters.taken(weekKey: week.key, directory: directory, own: own)
+        }
         taken = result
         positions = Dictionary(
             directory.players.map { ($0.id, LeaguePositions.bundled.resolved(for: $0)) },
@@ -329,5 +371,42 @@ struct FreeAgentsView: View {
             .map { (player: $0, last: sortKey($0.name)) }
             .sorted { ($0.last, $0.player.name) < ($1.last, $1.player.name) }
             .map { $0.player }
+    }
+}
+
+/// Where Jon pastes the league sheet link once. It stays on the phone and is not part of the code.
+struct LeagueSheetLinkView: View {
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage(LeagueSheetStore.linkKey) private var link = ""
+
+    private var valid: Bool { LeagueSheetClient.sheetID(from: link) != nil }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("https://docs.google.com/spreadsheets/d/...", text: $link, axis: .vertical)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.URL)
+                    if !link.isEmpty {
+                        Label(valid ? "Looks like a Google Sheets link" : "That doesn't look like a Google Sheets link",
+                              systemImage: valid ? "checkmark.circle" : "exclamationmark.triangle.fill")
+                            .font(.footnote)
+                            .foregroundStyle(valid ? Color.secondary : Color.orange)
+                    }
+                } header: {
+                    Text("League sheet link")
+                } footer: {
+                    let week = LeagueSheet.activeWeek()
+                    Text("Paste the link to the ACBL sheet (anyone with the link must be able to open it). The Free Agents tab reads the \(week.tab) tab now and moves to the next week's tab every Tuesday at 5 pm Pacific. The link stays on this phone.")
+                }
+            }
+            .navigationTitle("League sheet")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+            }
+        }
     }
 }
