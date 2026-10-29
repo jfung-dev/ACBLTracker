@@ -15,7 +15,7 @@ private enum PositionFilter: String, CaseIterable, Identifiable {
     }
 }
 
-/// Every NBA player who isn't on a league team's lineup this week (or on yours).
+/// Every NBA player who isn't on a league team's lineup this week (or on yours), best scorer first.
 /// Tap a player to add him with the usual Add player sheet.
 struct FreeAgentsView: View {
     @EnvironmentObject var directory: PlayerDirectory
@@ -27,6 +27,7 @@ struct FreeAgentsView: View {
     @State private var taken = TakenPlayers()
     @State private var pool: [DirectoryPlayer] = []
     @State private var adding: DirectoryPlayer?
+    @StateObject private var averages = SeasonAverages()
 
     private let rosters = LeagueRosters.bundled
 
@@ -34,10 +35,18 @@ struct FreeAgentsView: View {
         directory.injury(for: RosterPlayer(name: p.name, position: .G, teamHint: p.teamAbbr, espnID: p.id))
     }
 
+    /// Points per game this season, nil until he has played a regular-season game or his average has loaded.
+    private func ppg(_ p: DirectoryPlayer) -> Double? {
+        guard let a = averages.averages[p.id], a.games > 0 else { return nil }
+        return a.ppg
+    }
+
+    /// Highest PPG first. Players with no games yet (or no average yet) go last, in name order.
     private var visible: [DirectoryPlayer] {
         let key = query.normalizedName
         let teamQuery = query.trimmingCharacters(in: .whitespaces).uppercased()
-        return pool.filter { p in
+        let matches = pool.enumerated().filter { item in
+            let p = item.element
             if let want = filter.position, Position.fromESPN(p.position) != want { return false }
             if hideInjured, injury(for: p) != nil { return false }
             if !key.isEmpty {
@@ -45,6 +54,14 @@ struct FreeAgentsView: View {
             }
             return true
         }
+        return matches.sorted { a, b in
+            switch (ppg(a.element), ppg(b.element)) {
+            case let (x?, y?): return x != y ? x > y : a.offset < b.offset
+            case (_?, nil): return true
+            case (nil, _?): return false
+            case (nil, nil): return a.offset < b.offset
+            }
+        }.map { $0.element }
     }
 
     var body: some View {
@@ -59,8 +76,16 @@ struct FreeAgentsView: View {
                     }
                     .pickerStyle(.segmented)
                     Toggle("Hide injured", isOn: $hideInjured)
+                    if averages.isLoading {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("Loading PPG \(averages.done) of \(averages.total)")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 } footer: {
-                    Text("Positions here are ESPN's. You pick the league position when you add someone.")
+                    Text("PPG is this regular season only. Positions are ESPN's, and you pick the league position when you add someone.")
                 }
 
                 Section {
@@ -72,7 +97,7 @@ struct FreeAgentsView: View {
                         ForEach(shown) { row($0) }
                     }
                 } header: {
-                    Text("\(shown.count) available")
+                    Text("\(shown.count) available, by PPG")
                 } footer: {
                     if !lineupStore.isEditable {
                         Text("You're looking at a past week on the Lineup tab. Switch it to the current week to add players.")
@@ -90,10 +115,14 @@ struct FreeAgentsView: View {
                 await directory.load(force: true)
                 await directory.loadInjuries(force: true)
                 recompute()
+                // Don't hold the pull-to-refresh spinner for the whole PPG reload; the tab shows its own progress.
+                let ids = pool.map(\.id)
+                Task { await averages.load(ids: ids, force: true) }
             }
             .task(id: directory.players.count) {
                 await directory.loadInjuries()
                 recompute()
+                await averages.load(ids: pool.map(\.id))
             }
             .onChange(of: lineupStore.snapshots) { _, _ in recompute() }
             .sheet(item: $adding) { p in
@@ -171,6 +200,7 @@ struct FreeAgentsView: View {
                     }
                 }
                 Spacer()
+                ppgLabel(p)
                 Image(systemName: "plus.circle")
                     .foregroundStyle(lineupStore.isEditable ? Color.accentColor : Color.secondary)
             }
@@ -178,6 +208,23 @@ struct FreeAgentsView: View {
         }
         .buttonStyle(.plain)
         .disabled(!lineupStore.isEditable)
+    }
+
+    private func ppgLabel(_ p: DirectoryPlayer) -> some View {
+        VStack(alignment: .trailing, spacing: 1) {
+            if let avg = averages.averages[p.id], avg.games > 0 {
+                Text(String(format: "%.1f", avg.ppg))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                Text("\(avg.games) GP")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            } else if averages.averages[p.id] != nil {
+                Text("No games").font(.caption2).foregroundStyle(.secondary)
+            } else {
+                Text("-").foregroundStyle(.tertiary)
+            }
+        }
     }
 
     // MARK: Data

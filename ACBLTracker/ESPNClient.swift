@@ -169,6 +169,13 @@ struct RecentGame: Identifiable, Equatable {
 enum ClientError: Error {
     case badStatus
     case noData
+    case notFound
+}
+
+/// Points per game over a player's regular-season games. `games` is 0 when he hasn't played one yet.
+struct PlayerAverage: Codable, Equatable {
+    let ppg: Double
+    let games: Int
 }
 
 actor ESPNClient {
@@ -384,16 +391,7 @@ actor ESPNClient {
     /// A player's last five games this season, newest first. Cached for five minutes.
     func gameLog(athleteID: String) async throws -> [RecentGame] {
         if let hit = gameLogCache[athleteID], Date().timeIntervalSince(hit.fetched) < 300 { return hit.games }
-        // ESPN names a season by the year it ends: 2026-27 is 2027. Without this it may return the wrong season.
-        let comps = Calendar(identifier: .gregorian).dateComponents([.year, .month], from: Date())
-        let season = (comps.month ?? 1) >= 9 ? (comps.year ?? 2026) + 1 : (comps.year ?? 2027)
-        guard let url = URL(string: "https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/\(athleteID)/gamelog?season=\(season)")
-        else { throw ClientError.badStatus }
-        let (data, response) = try await session.data(from: url)
-        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            throw ClientError.badStatus
-        }
-        let r = try JSONDecoder().decode(GameLogResponse.self, from: data)
+        let r = try await loadGameLog(athleteID: athleteID)
         let names = r.names ?? []
         let labels = (r.labels ?? []).map { $0.uppercased() }
         func idx(_ name: String, _ label: String) -> Int? { names.firstIndex(of: name) ?? labels.firstIndex(of: label) }
@@ -442,6 +440,49 @@ actor ESPNClient {
         let games = Array(out.prefix(5))
         gameLogCache[athleteID] = (Date(), games)
         return games
+    }
+
+    /// This season's game log for a player. Throws `.notFound` when ESPN has no log for him (nobody who hasn't played).
+    private func loadGameLog(athleteID: String) async throws -> GameLogResponse {
+        // ESPN names a season by the year it ends: 2026-27 is 2027. Without this it may return the wrong season.
+        let comps = Calendar(identifier: .gregorian).dateComponents([.year, .month], from: Date())
+        let season = (comps.month ?? 1) >= 9 ? (comps.year ?? 2026) + 1 : (comps.year ?? 2027)
+        guard let url = URL(string: "https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/\(athleteID)/gamelog?season=\(season)")
+        else { throw ClientError.badStatus }
+        let (data, response) = try await session.data(from: url)
+        guard let http = response as? HTTPURLResponse else { throw ClientError.badStatus }
+        if http.statusCode == 404 { throw ClientError.notFound }
+        guard (200..<300).contains(http.statusCode) else { throw ClientError.badStatus }
+        return try JSONDecoder().decode(GameLogResponse.self, from: data)
+    }
+
+    /// Points per game across this season's regular-season games. Preseason games don't count.
+    func seasonAverage(athleteID: String) async throws -> PlayerAverage {
+        let r: GameLogResponse
+        do {
+            r = try await loadGameLog(athleteID: athleteID)
+        } catch ClientError.notFound {
+            return PlayerAverage(ppg: 0, games: 0)
+        }
+        let names = r.names ?? []
+        let labels = (r.labels ?? []).map { $0.uppercased() }
+        guard let ptsI = names.firstIndex(of: "points") ?? labels.firstIndex(of: "PTS") else {
+            throw ClientError.noData
+        }
+        var seen = Set<String>()
+        var total = 0
+        for t in r.seasonTypes ?? [] where (t.displayName ?? "").lowercased().contains("regular") {
+            for c in t.categories ?? [] {
+                for e in c.events ?? [] {
+                    guard let eid = e.eventId, !seen.contains(eid),
+                          let stats = e.stats, ptsI < stats.count, let pts = Int(stats[ptsI])
+                    else { continue }
+                    seen.insert(eid)
+                    total += pts
+                }
+            }
+        }
+        return PlayerAverage(ppg: seen.isEmpty ? 0 : Double(total) / Double(seen.count), games: seen.count)
     }
 
     // MARK: Teams and rosters
