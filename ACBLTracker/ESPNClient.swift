@@ -443,10 +443,11 @@ actor ESPNClient {
     }
 
     /// This season's game log for a player. Throws `.notFound` when ESPN has no log for him (nobody who hasn't played).
-    private func loadGameLog(athleteID: String) async throws -> GameLogResponse {
+    private func loadGameLog(athleteID: String, previousSeason: Bool = false) async throws -> GameLogResponse {
         // ESPN names a season by the year it ends: 2026-27 is 2027. Without this it may return the wrong season.
         let comps = Calendar(identifier: .gregorian).dateComponents([.year, .month], from: Date())
-        let season = (comps.month ?? 1) >= 9 ? (comps.year ?? 2026) + 1 : (comps.year ?? 2027)
+        let current = (comps.month ?? 1) >= 9 ? (comps.year ?? 2026) + 1 : (comps.year ?? 2027)
+        let season = previousSeason ? current - 1 : current
         guard let url = URL(string: "https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes/\(athleteID)/gamelog?season=\(season)")
         else { throw ClientError.badStatus }
         let (data, response) = try await session.data(from: url)
@@ -456,11 +457,11 @@ actor ESPNClient {
         return try JSONDecoder().decode(GameLogResponse.self, from: data)
     }
 
-    /// Points per game across this season's regular-season games. Preseason games don't count.
-    func seasonAverage(athleteID: String) async throws -> PlayerAverage {
+    /// Points per game across a season's regular-season games (this season unless `previousSeason`). Preseason games don't count.
+    func seasonAverage(athleteID: String, previousSeason: Bool = false) async throws -> PlayerAverage {
         let r: GameLogResponse
         do {
-            r = try await loadGameLog(athleteID: athleteID)
+            r = try await loadGameLog(athleteID: athleteID, previousSeason: previousSeason)
         } catch ClientError.notFound {
             return PlayerAverage(ppg: 0, games: 0)
         }
