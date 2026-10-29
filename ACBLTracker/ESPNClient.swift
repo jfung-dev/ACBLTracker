@@ -176,6 +176,10 @@ enum ClientError: Error {
 struct PlayerAverage: Codable, Equatable {
     let ppg: Double
     let games: Int
+    /// Games with 30 or more points. A 40-point game is in both counts.
+    var games30: Int = 0
+    /// Games with 40 or more points.
+    var games40: Int = 0
 }
 
 actor ESPNClient {
@@ -472,6 +476,8 @@ actor ESPNClient {
         }
         var seen = Set<String>()
         var total = 0
+        var thirty = 0
+        var forty = 0
         for t in r.seasonTypes ?? [] where (t.displayName ?? "").lowercased().contains("regular") {
             for c in t.categories ?? [] {
                 for e in c.events ?? [] {
@@ -480,10 +486,15 @@ actor ESPNClient {
                     else { continue }
                     seen.insert(eid)
                     total += pts
+                    if pts >= 30 { thirty += 1 }
+                    if pts >= 40 { forty += 1 }
                 }
             }
         }
-        return PlayerAverage(ppg: seen.isEmpty ? 0 : Double(total) / Double(seen.count), games: seen.count)
+        return PlayerAverage(
+            ppg: seen.isEmpty ? 0 : Double(total) / Double(seen.count), games: seen.count,
+            games30: thirty, games40: forty
+        )
     }
 
     // MARK: Teams and rosters

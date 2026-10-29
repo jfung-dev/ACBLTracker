@@ -42,7 +42,7 @@ struct AddPlayerView: View {
                 } header: {
                     Text("Your league's position for him")
                 } footer: {
-                    Text("Positions come from your league's pre-draft list, so set it to match. It starts at ESPN's listing.")
+                    Text("It starts at your league sheet's position for him, or ESPN's if the sheet doesn't list him. Change it if your league has him elsewhere.")
                 }
 
                 Section("He'll go to") {
@@ -65,7 +65,7 @@ struct AddPlayerView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
             }
-            .onAppear { position = Position.fromESPN(player.position) }
+            .onAppear { position = LeaguePositions.bundled.resolved(for: player) }
         }
         .presentationDetents([.large])
     }

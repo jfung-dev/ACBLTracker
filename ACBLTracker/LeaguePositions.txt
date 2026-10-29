@@ -1,0 +1,93 @@
+# League positions from the "Final Revised ACBL Positions" column of the Positions tab of the league sheet.
+# One line per team and position: TEAM|POSITION|Name;Name;Name
+# Players the sheet leaves blank are left out and use ESPN's position.
+ATL|C|Henri Veesaar;Jock Landale;Onyeka Okongwu
+ATL|F|Asa Newell;Corey Kispert;Dorian Finney-Smith;Jalen Johnson;Jalen Wilson;Mouhamed Gueye;Zuby Ejiofor;Nickeil Alexander-Walker
+ATL|G|Aaron Wiggins;CJ McCollum;Dyson Daniels;Keshon Gilbert;Kingston Flemings;Luguentz Dort;RayJ Dennis
+BKN|C|Day'Ron Sharpe;Moritz Wagner
+BKN|F|Julius Randle;Ben Humrichous;Dain Dainja;Danny Wolf;Grant Nelson;Josh Minott;Joshua Jefferson;Michael Porter Jr.;Nick Pringle;Noah Clowney;Tyler Bilodeau
+BKN|G|Ben Saraf;Chaney Johnson;Drake Powell;Egor Dëmin;Keon Ellis;Mikel Brown Jr.;Nolan Traore;Terance Mann
+BOS|C|Amari Williams;Luka Garza;Mitchell Robinson;Neemias Queta
+BOS|F|Chris Cenac Jr.;Dillon Mitchell;Gabe McGlothan;Jayson Tatum;Paul George;Sam Hauser
+BOS|G|Baylor Scheierman;Derrick White;Devin Carter;Hayden Gray;Hugo González;Jordan Walsh;Mike Conley;Milos Uzan;Payton Pritchard;Ron Harper Jr.
+CHA|C|Naz Reid;PJ Hall;Ryan Kalkbrenner
+CHA|F|Brandon Miller;Grant Williams;Hannes Steinbach;Liam McNeeley;Moussa Diabaté;Royce O'Neale;Tidjane Salaün
+CHA|G|Buddy Hield;Christian Anderson;Coby White;Dennis Schröder;Grayson Allen;Kon Knueppel;Kylan Boswell;Michael Ajayi;Pat Connaughton;Ryan Nembhard;Sion James
+CHI|C|Jalen Smith;Nic Claxton
+CHI|F|Caleb Wilson;Dailyn Swain;Isaac Okoro;Leonard Miller;Matas Buzelis;Noa Essengue;Patrick Williams;Tobe Awaka;Zach Collins
+CHI|G|Josh Giddey;Norman Powell;Peter Suder;Rob Dillingham;Tre Jones
+CLE|C|Ernest Udeh, Jr.;Jarrett Allen;Khalifa Diop;Thomas Bryant;Evan Mobley
+CLE|F|Mario Hezonja;Nae'Qwan Tomlin;Riley Minix;Tristan Enaruna
+CLE|G|Craig Porter Jr.;Curtis Jones;Donovan Mitchell;James Harden;Jaylon Tyson;Kadary Richmond;Meleek Thomas;Peyton Watson;Sam Merrill;Tyrese Proctor;Zack Austin
+DAL|C|Daniel Gafford;Dereck Lively II;Moussa Cisse
+DAL|F|Caleb Martin;Cooper Flagg;Morez Johnson Jr.;Naji Marshall;P.J. Washington;Santi Aldama;Tarik Biberovic;Tobi Lawal;Zaccharie Risacher
+DAL|G|Jett Howard;John Poulakidas;Kyrie Irving;Marcus Sasser;Max Christie;Sergio de Larrea
+DEN|C|Nikola Jokić;Zeke Nnaji;Aaron Gordon
+DEN|F|Cam Whitmore;Cameron Johnson;DaRon Holmes II;DeMar DeRozan;Marvin Bagley III;Spencer Jones;Trevon Brazile
+DEN|G|Boopie Miller;Christian Braun;Jamal Murray;Julian Strawther;KJ Simpson;Lonnie Walker IV;Tyus Jones
+DET|C|Jalen Duren;Ugonna Onyenso
+DET|F|Ausar Thompson;Duncan Robinson;Isaac Jones;John Collins;Paul Reed;Ronald Holland II;Taurean Prince;Tolu Smith
+DET|G|Cade Cunningham;Chaz Lanier;Daniss Jenkins;Ebuka Okorie;Elijah Harkless;Gary Harris;Isaiah Joe;Javonte Green;Kevin Huerter
+GSW|C|Al Horford;Charles Bassey;Kristaps Porziņģis
+GSW|F|Alex Toohey;Dalen Terry;Draymond Green;Georges Niang;Gui Santos;Jimmy Butler III;Malevy Leons;Yaxel Lendeborg
+GSW|G|Brandin Podziemski;Brandon Williams;De'Anthony Melton;Gary Payton II;LJ Cryer;Moses Moody;Nick Boyd;Stephen Curry;Will Richard
+HOU|C|Alperen Sengun;Clint Capela;Oscar Tshiebwe;Rafael Castro;Steven Adams;Jabari Smith Jr.
+HOU|F|Amen Thompson;Isaiah Crawford;Jae'Sean Tate;Julian Phillips;Kevin Durant;Tari Eason
+HOU|G|Bogdan Bogdanović;Bruce Thornton;Fred VanVleet;Marcus Smart;Quadir Copeland;Reed Sheppard;Sean Pedulla
+IND|C|Ivica Zubac;Jay Huff;Keba Keita;Larry Nance Jr.;Rienk Mast;Pascal Siakam
+IND|F|Aaron Nesmith;Jalen Slawson;James Johnson;Jarace Walker;Kelly Oubre Jr.;Kobe Brown;Obi Toppin
+IND|G|Andrew Nembhard;Ben Sheppard;Braden Smith;Johnny Furphy;Quenton Jackson;T.J. McConnell;Tyrese Haliburton
+LAC|C|Brook Lopez;Jamarion Sharp;Yanic Konan Niederhäuser
+LAC|F|Baba Miller;Brandon Ingram;Derrick Jones Jr.;Isaiah Jackson;Johni Broome;Nick Martinelli;Rui Hachimura
+LAC|G|Bradley Beal;Cam Christie;Darius Garland;Gradey Dick;Jalen Pickett;Jordan Miller;Keaton Wagler;Kobe Sanders;Kris Dunn;Max Strus;Yuki Kawamura
+LAL|C|Sandro Mamukelashvili;Walker Kessler
+LAL|F|AK Okereke;Arthur Kaluma;Dalton Knecht;Jake LaRavia;Jarred Vanderbilt;Kevon Looney;Ziaire Williams
+LAL|G|Adou Thiero;Austin Reaves;Bronny James;Cameron Carr;Chris Mañon;Collin Sexton;Jaden Hardy;Luka Dončić;Matisse Thybulle;Meechie Johnson;Quentin Grimes
+MEM|C|Isaiah Stewart;Quinten Post;Zach Edey
+MEM|F|Cameron Boozer;GG Jackson;Jaylen Wells;Jerami Grant;Karim Lopez;Kris Murray;Olivier-Maxence Prosper;Taylor Hendricks;Cedric Coward
+MEM|G|Cam Spencer;D'Angelo Russell;Jahmai Mashack;Javon Small;Jordan Hawkins;Micah Peavy;Scotty Pippen Jr.;Ty Jerome;Walter Clayton Jr.
+MIA|C|Bam Adebayo;Nick Richards;Vladislav Goldin
+MIA|F|Andrew Wiggins;Bobby Portis Jr.;Giannis Antetokounmpo;Keshad Johnson;Myron Gardner;Nikola Jović;Simone Fontecchio
+MIA|G|Bez Mbeng;Davion Mitchell;Dru Smith;Klay Thompson;Pelle Larsson;Ryan Conwell;Tim Hardaway Jr.;Tre Donaldson
+MIL|C|Jake Stephens;Jericho Sims;Kel'el Ware;Myles Turner
+MIL|F|Bogoljub Marković;John Butler Jr.;Kyle Kuzma;Nate Ament;Ousmane Dieng;Pete Nance;Jaime Jaquez Jr.
+MIL|G|AJ Green;Brayden Burries;Caris LeVert;Cormac Ryan;Gary Trent Jr.;Kam Jones;Kasparas Jakučionis;Kevin Porter Jr.;Ryan Rollins;Tyler Herro
+MIN|C|Rocco Zikarsky;Rudy Gobert
+MIN|F|Cody Williams;Enrique Freeman;Isaiah Evans;Jaden McDaniels;Joan Beringer;Jonathan Kuminga;Nate Santos;Trey Lyles
+MIN|G|Anthony Edwards;Ayo Dosunmu;Bones Hyland;Donte DiVincenzo;Jaylen Clark;LaMelo Ball;Terrence Shannon Jr;Zyon Pullin
+NOP|C|Christian Koloko;DeAndre Jordan;Derik Queen;Karlo Matković;Yves Missi;Zion Williamson
+NOP|F|Bennedict Mathurin;Herbert Jones;Malik Dia;Saddiq Bey;Trendon Watford;Trey Murphy III
+NOP|G|AJ Johnson;Bryce McGowens;Caleb Houstan;Dejounte Murray;Jaron Pierre Jr.;Jeremiah Fears;Jordan Poole;Kobe Bufkin
+NYK|C|Andre Drummond;Drew Eubanks;James Wiseman;Karl-Anthony Towns
+NYK|F|Mikal Bridges;Mohamed Diawara;OG Anunoby;Pacôme Dadiet;Josh Hart
+NYK|G|Bruce Brown;Jalen Brunson;John Konchar;Jordan Clarkson;Jose Alvarado;Landry Shamet;Miles McBride;Ochai Agbaji;Tyler Kolek
+OKC|C|Aday Mara;Chet Holmgren;Isaiah Hartenstein;Thomas Sorber
+OKC|F|Jalen Williams;Jaylin Williams;Kenrich Williams
+OKC|G|Ajay Mitchell;Alex Caruso;Bennett Stirtz;Brooks Barnhizer;Cason Wallace;Jared McCain;Nikola Topić;Otega Oweh;Shai Gilgeous-Alexander
+ORL|C|Colin Castleton;Goga Bitadze;Nikola Vučević;Wendell Carter Jr.
+ORL|F|Franz Wagner;Izaiyah Nelson;Jamal Cain;Jonathan Isaac;Malaki Branham;Paolo Banchero;Tristan da Silva;Desmond Bane
+ORL|G|Alex Morales;Anthony Black;Jalen Suggs;Jase Richardson;JD Davison;Jevon Carter;Noah Penda
+PHI|C|Ariel Hukporti;Dean Wade;Joel Embiid;Tacko Fall;LeBron James
+PHI|F|Adem Bona;Dillon Jones;Dominick Barlow;Jabari Walker;Jaylen Brown;Justin Edwards;Saint Thomas
+PHI|G|Anfernee Simons;Caleb Love;Duke Miles;Jameer Nelson Jr.;Kentavious Caldwell-Pope;Labaron Philon;Rayan Rupert;Tyrese Maxey;VJ Edgecombe
+PHX|C|Khaman Maluach;Mark Williams
+PHX|F|CJ Huntley;Dillon Brooks;Haywood Highsmith;John Camden;Koa Peat;Miles Bridges;Oso Ighodaro;Rasheer Fleming;Ryan Dunn
+PHX|G|Collin Gillespie;Devin Booker;Jalen Green;Jamaree Bouyea;Jordan Goodwin;Koby Brea;Luke Kennard;Pat Spencer
+POR|C|Branden Carlson;Donovan Clingan;Micah Potter;Robert Williams III;Samson Johnson;Yang Hansen
+POR|F|Deni Avdija;Jayson Kent;Jeremy Sochan;Keylan Boone;Toumani Camara;Shaedon Sharpe
+POR|G|Chris Youngblood;Damian Lillard;Ja Morant;John Tonje;Jrue Holiday;Mark Armstrong;Scoot Henderson;Sidy Cissoko;Vít Krejčí
+SAC|C|Domantas Sabonis;Dylan Cardwell;Maxime Raynaud
+SAC|F|Alex Karaban;De'Andre Hunter;Jonathan Mogbo;Keegan Murray;Precious Achiuwa;Ben Simmons;Zach LaVine
+SAC|G|Adam Flagler;Daeqwon Plowden;Darius Acuff Jr.;Elfrid Payton;Emanuel Sharp;Malik Monk;Nique Clifford
+SAS|C|Luke Kornet;Tarris Reed Jr.;Victor Wembanyama
+SAS|F|Carter Bryant;Devin Vassell;Harrison Barnes;Jayden Quaintance;Julian Champagnie;Keldon Johnson;Maliq Brown;Tobias Harris
+SAS|G|David Jones Garcia;De'Aaron Fox;Dylan Harper;Ja'Kobi Gillespie;Jayden Nunn;Jordan McLaughlin;Miles Barnstable;Stephon Castle;Taelon Peter
+TOR|C|Jakob Poeltl;Nate Bittle;Trey Jemison III
+TOR|F|Allen Graves;Collin Murray-Boyles;Jamison Battle;Kawhi Leonard;Kyle Anderson;RJ Barrett;Scottie Barnes;Trayce Jackson-Davis
+TOR|G|Alijah Martin;Andre Jackson Jr.;Chucky Hepburn;Immanuel Quickley;Ja'Kobe Walter;Jaden Bradley;Jamal Shead;Malachi Smith
+UTA|C|Ibrahima Diallo;Jaren Jackson Jr.;Jaxson Hayes;Jusuf Nurkić;Kyle Filipowski;Mo Bamba
+UTA|F|Lauri Markkanen;Ace Bailey;Blake Hinson;Brice Sensabaugh;Harrison Ingram
+UTA|G|Darryn Peterson;Isaiah Collier;Josh Green;Josh Okogie;Keyonte George;Svi Mykhailiuk;Tamar Bates;Trey Alexander
+WAS|C|Alex Sarr;Deandre Ayton;Felix Okpara;Anthony Davis
+WAS|F|AJ Dybantsa;Anthony Gill;Jamir Watkins;KeShawn Murphy;Khris Middleton;Kyshawn George;Tristan Vukcevic;Will Riley
+WAS|G|Bilal Coulibaly;Bub Carrington;Justin Champagnie;Trae Young;Tre Johnson;Tre Mann

@@ -40,7 +40,7 @@ struct PlayerPickerView: View {
                     ForEach(directory.search(query)) { p in
                         Button {
                             chosen = p
-                            position = lockedPosition ?? Position.fromESPN(p.position)
+                            position = lockedPosition ?? LeaguePositions.bundled.resolved(for: p)
                         } label: {
                             pickerRow(p)
                         }

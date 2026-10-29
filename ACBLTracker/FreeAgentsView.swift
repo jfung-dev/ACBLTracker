@@ -36,6 +36,8 @@ struct FreeAgentsView: View {
     @State private var pool: [DirectoryPlayer] = []
     @State private var adding: DirectoryPlayer?
     @State private var outByTeam: [String: [KeyOut]] = [:]
+    /// League position per ESPN id, worked out once per refresh. The sheet's Positions tab first, ESPN's listing otherwise.
+    @State private var positions: [String: Position] = [:]
     @State private var onlyKeyTeammateOut = false
     @StateObject private var averages = SeasonAverages()
 
@@ -46,6 +48,10 @@ struct FreeAgentsView: View {
 
     private func injury(for p: DirectoryPlayer) -> Injury? {
         directory.injury(for: RosterPlayer(name: p.name, position: .G, teamHint: p.teamAbbr, espnID: p.id))
+    }
+
+    private func position(of p: DirectoryPlayer) -> Position {
+        positions[p.id] ?? Position.fromESPN(p.position)
     }
 
     private static func isOut(_ injury: Injury) -> Bool { injury.status.lowercased().contains("out") }
@@ -74,7 +80,7 @@ struct FreeAgentsView: View {
         let teamQuery = query.trimmingCharacters(in: .whitespaces).uppercased()
         let matches = pool.enumerated().filter { item in
             let p = item.element
-            if let want = filter.position, Position.fromESPN(p.position) != want { return false }
+            if let want = filter.position, position(of: p) != want { return false }
             if hideInjured, injury(for: p) != nil { return false }
             if onlyKeyTeammateOut, keyOuts(for: p).isEmpty { return false }
             if !key.isEmpty {
@@ -114,7 +120,7 @@ struct FreeAgentsView: View {
                         }
                     }
                 } footer: {
-                    Text("PPG is this regular season only. A key teammate is one who scores \(Int(Self.keyScorerPPG))+ PPG (last season's until he has played) and is listed out. Positions are ESPN's, and you pick the league position when you add someone.")
+                    Text("PPG is this regular season only. A key teammate is one who scores \(Int(Self.keyScorerPPG))+ PPG (last season's until he has played) and is listed out. 30+ and 40+ count this season's games with that many points, so a 40-point game is in both. Positions come from your league sheet's Positions tab, or ESPN's for anyone it leaves blank.")
                 }
 
                 Section {
@@ -225,7 +231,7 @@ struct FreeAgentsView: View {
                         if hurt != nil { InjuryMark() }
                     }
                     HStack(spacing: 6) {
-                        PositionPill(position: Position.fromESPN(p.position))
+                        PositionPill(position: position(of: p))
                         TeamTag(display: display)
                     }
                     if let hurt {
@@ -269,6 +275,15 @@ struct FreeAgentsView: View {
                 Text("\(avg.games) GP")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                if avg.games30 > 0 {
+                    HStack(spacing: 5) {
+                        Text("30+ \u{00D7}\(avg.games30)").foregroundStyle(.orange)
+                        if avg.games40 > 0 {
+                            Text("40+ \u{00D7}\(avg.games40)").foregroundStyle(.red)
+                        }
+                    }
+                    .font(.system(size: 10, weight: .bold))
+                }
             } else if averages.averages[p.id] != nil {
                 Text("No games").font(.caption2).foregroundStyle(.secondary)
             } else {
@@ -301,6 +316,10 @@ struct FreeAgentsView: View {
             own: lineupStore.resolvedLineup(for: weekKey)
         )
         taken = result
+        positions = Dictionary(
+            directory.players.map { ($0.id, LeaguePositions.bundled.resolved(for: $0)) },
+            uniquingKeysWith: { first, _ in first }
+        )
 
         func sortKey(_ name: String) -> String {
             name.normalizedName.split(separator: " ").last.map(String.init) ?? name
