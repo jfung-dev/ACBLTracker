@@ -37,6 +37,8 @@ struct RootView: View {
                 .tabItem { Label("Lineup", systemImage: "list.number") }
             NightlyView()
                 .tabItem { Label("Nightly", systemImage: "moon.stars") }
+            FreeAgentsView()
+                .tabItem { Label("Free Agents", systemImage: "person.crop.circle.badge.plus") }
             HistoryView()
                 .tabItem { Label("History", systemImage: "chart.bar.fill") }
         }

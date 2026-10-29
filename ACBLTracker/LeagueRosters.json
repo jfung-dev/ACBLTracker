@@ -1,0 +1,105 @@
+{
+  "weeks": {
+    "2026-10-27": {
+      "sheet": "W2",
+      "teams": [
+        {
+          "name": "Beaucoup Buckets (Evan)",
+          "players": [
+            "Shai Gilgeous-Alexander|OKC", "Trae Young|WAS", "Pascal Siakam|IND", "Scottie Barnes|TOR", "Zach LaVine|SAC",
+            "Domantas Sabonis|SAC", "Ajay Mitchell|OKC", "Obi Toppin|IND",
+            "Anthony Black|ORL", "Aday Mara|OKC", "De'Andre Hunter|SAC", "Andrew Wiggins|MIA", "Anfernee Simons|PHI", "Kristaps Porziņģis|GSW"
+          ]
+        },
+        {
+          "name": "Xuerta Dingoes (Grant)",
+          "players": [
+            "LaMelo Ball|MIN", "Darius Acuff Jr.|SAC", "Victor Wembanyama|SAS", "Brandon Miller|CHA", "Franz Wagner|ORL",
+            "Paul George|BOS", "Ja Morant|POR", "Cedric Coward|MEM",
+            "Ivica Zubac|IND", "Keaton Wagler|LAC", "Sandro Mamukelashvili|LAL", "Derik Queen|NOP", "Ausar Thompson|DET", "Bradley Beal|LAC"
+          ]
+        },
+        {
+          "name": "Fools Rule (Sam)",
+          "players": [
+            "Tyrese Maxey|PHI", "Cade Cunningham|DET", "Michael Porter Jr.|BKN", "Desmond Bane|ORL", "Bam Adebayo|MIA",
+            "Stephon Castle|SAS", "Toumani Camara|POR", "Ace Bailey|UTA",
+            "Reed Sheppard|HOU", "Fred VanVleet|HOU", "Bennedict Mathurin|NOP", "Onyeka Okongwu|ATL", "Kevin Porter Jr.|MIL", "Kelly Oubre Jr.|IND"
+          ]
+        },
+        {
+          "name": "Brun and Gun (Jon)",
+          "players": [
+            "Jalen Brunson|NYK", "Kyrie Irving|DAL", "Kevin Durant|HOU", "Cameron Boozer|MEM", "Zion Williamson|NOP",
+            "Derrick White|BOS", "Caleb Wilson|CHI", "Naz Reid|CHA",
+            "Cameron Johnson|DEN", "Keegan Murray|SAC", "Ayo Dosunmu|MIN", "Grayson Allen|CHA", "Mikel Brown Jr.|BKN", "Shaedon Sharpe|POR"
+          ]
+        },
+        {
+          "name": "Montlake Maulers (Steve)",
+          "players": [
+            "Jayson Tatum|BOS", "Kawhi Leonard|TOR", "Jaren Jackson Jr.|UTA", "Tyrese Haliburton|IND", "Jalen Green|PHX",
+            "Dejounte Murray|NOP", "Andrew Nembhard|IND", "Ryan Rollins|MIL",
+            "Jaylen Wells|MEM", "Saddiq Bey|NOP", "Chet Holmgren|OKC", "Kyle Kuzma|MIL", "Tre Johnson|WAS", "Pelle Larsson|MIA"
+          ]
+        },
+        {
+          "name": "Ginobimura (Gabe)",
+          "players": [
+            "Anthony Edwards|MIN", "Ty Jerome|MEM", "Matas Buzelis|CHI", "Nickeil Alexander-Walker|ATL", "Anthony Davis|WAS",
+            "Darius Garland|LAC", "Jared McCain|OKC", "Brandin Podziemski|GSW",
+            "Kyshawn George|WAS", "Rui Hachimura|LAC", "Alex Sarr|WAS", "Jordan Poole|NOP", "Maxime Raynaud|SAC", "Paolo Banchero|ORL"
+          ]
+        },
+        {
+          "name": "You had me at Herro (Jordan)",
+          "players": [
+            "Donovan Mitchell|CLE", "Tyler Herro|MIL", "Jaylen Brown|PHI", "Trey Murphy III|NOP", "Evan Mobley|CLE",
+            "RJ Barrett|TOR", "Jerami Grant|MEM", "Jarrett Allen|CLE",
+            "Josh Giddey|CHI", "Collin Sexton|LAL", "Quentin Grimes|LAL", "Jalen Suggs|ORL", "Aaron Nesmith|IND", "Jakob Poeltl|TOR"
+          ]
+        },
+        {
+          "name": "Duffelbagz",
+          "players": [
+            "Giannis Antetokounmpo|MIA", "Jalen Johnson|ATL", "Karl-Anthony Towns|NYK", "Damian Lillard|POR", "Payton Pritchard|BOS",
+            "LeBron James|PHI", "Coby White|CHA", "Davion Mitchell|MIA",
+            "Christian Braun|DEN", "Jeremiah Fears|NOP", "Collin Murray-Boyles|TOR", "Scoot Henderson|POR", "Brandon Ingram|LAC", "Jimmy Butler III|GSW"
+          ]
+        },
+        {
+          "name": "Yugo Boss (Igor)",
+          "players": [
+            "Nikola Jokić|DEN", "Deni Avdija|POR", "Julius Randle|BKN", "Norman Powell|CHI", "James Harden|CLE",
+            "De'Aaron Fox|SAS", "Duncan Robinson|DET", "Jonathan Kuminga|MIN",
+            "Aaron Gordon|DEN", "John Collins|DET", "Darryn Peterson|UTA", "Devin Vassell|SAS", "GG Jackson|MEM", "Mikal Bridges|NYK"
+          ]
+        },
+        {
+          "name": "Beginner's Luka (Kojiro)",
+          "players": [
+            "Luka Dončić|LAL", "Jamal Murray|DEN", "Miles Bridges|PHX", "Jaden McDaniels|MIN", "Donovan Clingan|POR",
+            "Immanuel Quickley|TOR", "Tristan da Silva|ORL", "VJ Edgecombe|PHI",
+            "AJ Dybantsa|WAS", "Jaylon Tyson|CLE", "Brice Sensabaugh|UTA", "Zaccharie Risacher|DAL", "Jalen Duren|DET", "Kennedy Chandler|"
+          ]
+        },
+        {
+          "name": "The Spirit of OGs Putback (Leo)",
+          "players": [
+            "Devin Booker|PHX", "Stephen Curry|GSW", "Lauri Markkanen|UTA", "DeMar DeRozan|DEN", "Alperen Sengun|HOU",
+            "Dylan Harper|SAS", "Kon Knueppel|CHA", "OG Anunoby|NYK",
+            "Walker Kessler|LAL", "Jaime Jaquez Jr.|MIL", "Wendell Carter Jr.|ORL", "Brayden Burries|MIL", "Egor Dëmin|BKN", "Joan Beringer|MIN"
+          ]
+        },
+        {
+          "name": "Jammin' Bandits",
+          "players": [
+            "Cooper Flagg|DAL", "Yaxel Lendeborg|GSW", "Joel Embiid|PHI", "Austin Reaves|LAL", "Keyonte George|UTA",
+            "CJ McCollum|ATL", "Amen Thompson|HOU", "Jabari Smith Jr.|HOU",
+            "Dillon Brooks|PHX", "Peyton Watson|CLE", "Paul Reed|DET", "Kel'el Ware|MIL", "Naji Marshall|DAL", "Zach Edey|MEM"
+          ]
+        }
+      ]
+    }
+  }
+}
