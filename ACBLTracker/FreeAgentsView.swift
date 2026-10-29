@@ -194,13 +194,14 @@ struct FreeAgentsView: View {
     @ViewBuilder
     private var statusSection: some View {
         let week = LeagueSheet.activeWeek()
+        let at = sheet.checkedAt.map { " Checked \($0.formatted(date: .omitted, time: .shortened))." } ?? ""
         switch sheet.status {
         case .live(let tab, let count):
-            note("Live from the \(tab) tab of the league sheet (\(count) players)", systemImage: "checkmark.circle", warn: false)
+            note("Live from the \(tab) tab of the league sheet (\(count) players).\(at)", systemImage: "checkmark.circle", warn: false)
         case .saved(let tab, let date, let reason):
-            note("\(reason) Using the \(tab) copy saved \(date.formatted(.relative(presentation: .named))).", systemImage: "exclamationmark.triangle.fill", warn: true)
+            note("\(reason) Using the \(tab) copy saved \(date.formatted(.relative(presentation: .named))).\(at)", systemImage: "exclamationmark.triangle.fill", warn: true)
         case .older(let tab, let reason):
-            note("\(reason) Using the \(tab) tab instead, so this list may be a week behind.", systemImage: "exclamationmark.triangle.fill", warn: true)
+            note("\(reason) Using the \(tab) tab instead, so this list may be a week behind.\(at)", systemImage: "exclamationmark.triangle.fill", warn: true)
         case .idle, .loading:
             Section {
                 HStack(spacing: 8) {
@@ -217,11 +218,12 @@ struct FreeAgentsView: View {
     private func bundledNote(week: LeagueSheet.ActiveWeek) -> some View {
         let linked: Bool = { if case .unavailable = sheet.status { return true } else { return false } }()
         let why: String = { if case .unavailable(let r) = sheet.status { return r + " " } else { return "" } }()
+        let at = sheet.checkedAt.map { " Checked \($0.formatted(date: .omitted, time: .shortened))." } ?? ""
         if let tab = taken.sheet {
             if tab == week.tab && !linked {
                 note("Using the bundled \(tab) rosters. Tap the link button and paste your league sheet's link so each new week loads on its own.", systemImage: "info.circle", warn: false)
             } else if tab == week.tab {
-                note("\(why)Using the bundled \(tab) rosters.", systemImage: "exclamationmark.triangle.fill", warn: true)
+                note("\(why)Using the bundled \(tab) rosters.\(at)", systemImage: "exclamationmark.triangle.fill", warn: true)
             } else {
                 note("\(why)The bundled rosters are from \(tab), but \(week.tab) is the week to look at. Tap the link button to read it from the sheet.", systemImage: "exclamationmark.triangle.fill", warn: true)
             }

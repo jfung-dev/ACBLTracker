@@ -228,13 +228,14 @@ enum LeagueSheet {
 
 enum LeagueSheetClient {
     enum FetchError: LocalizedError {
-        case badLink, network, notShared, tooFew(Int)
+        case badLink, network, notShared, tabMissing(String), tooFew(Int)
 
         var errorDescription: String? {
             switch self {
             case .badLink: return "The saved sheet link isn't valid."
             case .network: return "Couldn't reach the league sheet."
             case .notShared: return "The league sheet wouldn't open. Check that link sharing is on."
+            case .tabMissing(let tab): return "The \(tab) tab doesn't exist in the sheet yet."
             case .tooFew(let n): return n == 0 ? "The tab has no lineups yet." : "The tab only has \(n) players so far."
             }
         }
@@ -251,13 +252,12 @@ enum LeagueSheetClient {
         return nil
     }
 
-    static func csvURL(id: String, tab: String) -> URL? {
+    static func csvURL(id: String, tab: String?) -> URL? {
         var c = URLComponents(string: "https://docs.google.com/spreadsheets/d/\(id)/gviz/tq")
         c?.queryItems = [
             URLQueryItem(name: "tqx", value: "out:csv"),
-            URLQueryItem(name: "sheet", value: tab),
             URLQueryItem(name: "headers", value: "0"),
-        ]
+        ] + (tab.map { [URLQueryItem(name: "sheet", value: $0)] } ?? [])
         return c?.url
     }
 
@@ -270,8 +270,15 @@ enum LeagueSheetClient {
         let response: URLResponse
         do { (data, response) = try await URLSession.shared.data(for: request) } catch { throw FetchError.network }
         guard let http = response as? HTTPURLResponse else { throw FetchError.network }
+        if http.statusCode == 400 { throw FetchError.tabMissing(tab) }
         guard http.statusCode == 200, let text = String(data: data, encoding: .utf8),
               !text.hasPrefix("<") else { throw FetchError.notShared }
+        // Google may answer a tab name it doesn't know with the sheet's first tab. If this reply is identical
+        // to the reply with no tab named, the tab isn't there.
+        if let plain = csvURL(id: id, tab: nil),
+           let (plainData, _) = try? await URLSession.shared.data(from: plain), plainData == data {
+            throw FetchError.tabMissing(tab)
+        }
         let cells = LeagueSheet.parseCSV(text).flatMap { $0 }.filter { LeagueSheet.parseCell($0) != nil }
         guard cells.count >= minimumPlayers else { throw FetchError.tooFew(cells.count) }
         return cells
@@ -303,6 +310,8 @@ final class LeagueSheetStore: ObservableObject {
     @Published private(set) var status: Status = .idle
     /// Bumped whenever `snapshot` changes, so views can react without comparing every cell.
     @Published private(set) var revision = 0
+    /// When the sheet was last asked, whether or not it had what we wanted.
+    @Published private(set) var checkedAt: Date?
 
     private var lastLive: (tab: String, date: Date)?
 
@@ -341,6 +350,7 @@ final class LeagueSheetStore: ObservableObject {
            case .live = status { return }
 
         if snapshot == nil { status = .loading }
+        checkedAt = Date()
         do {
             let cells = try await LeagueSheetClient.playerCells(id: id, tab: week.tab)
             writeSaved(week.tab, cells)
@@ -362,11 +372,11 @@ final class LeagueSheetStore: ObservableObject {
         if week.number > 1 {
             let prev = "W\(week.number - 1)"
             if let cells = try? await LeagueSheetClient.playerCells(id: id, tab: prev) {
-                set(Snapshot(tab: prev, cells: cells), .older(tab: prev, reason: "\(week.tab): \(reason)"))
+                set(Snapshot(tab: prev, cells: cells), .older(tab: prev, reason: reason))
                 return
             }
             if let saved = readSaved(prev) {
-                set(Snapshot(tab: prev, cells: saved.cells), .older(tab: prev, reason: "\(week.tab): \(reason)"))
+                set(Snapshot(tab: prev, cells: saved.cells), .older(tab: prev, reason: reason))
                 return
             }
         }
