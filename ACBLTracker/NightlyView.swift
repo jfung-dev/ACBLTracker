@@ -4,8 +4,8 @@ struct NightlyView: View {
     @EnvironmentObject var week: WeekStore
     @EnvironmentObject var directory: PlayerDirectory
     @State private var selectedDay: Date = ET.startOfDay(Date())
-    /// The player whose stat sheet is open. Same sheet as the Lineup tab.
-    @State private var detail: RosterPlayer?
+    /// The row whose stat sheet is open: that player's game on that night.
+    @State private var detail: NightRow?
 
     /// The day actually shown: the picked day if it's in this week, else today, else the week's first day.
     private var day: Date {
@@ -34,7 +34,7 @@ struct NightlyView: View {
                     }
                     Section("Players") {
                         ForEach(rows) { row in
-                            Button { detail = row.player } label: {
+                            Button { detail = row } label: {
                                 NightRowView(row: row)
                                     .contentShape(Rectangle())
                             }
@@ -52,8 +52,8 @@ struct NightlyView: View {
                 // Run in its own task so a SwiftUI redraw mid-pull can't cancel the network calls.
                 await Task { await week.refresh() }.value
             }
-            .sheet(item: $detail) { player in
-                PlayerDetailView(player: player)
+            .sheet(item: $detail) { row in
+                PlayerDetailView(player: row.player, onlyGame: row.gameIndex)
             }
         }
     }

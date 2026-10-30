@@ -4,6 +4,8 @@ import SwiftUI
 /// how each one scored, and how he's played lately.
 struct PlayerDetailView: View {
     let player: RosterPlayer
+    /// Which of his two counting games to show (0 or 1). Nil shows both, as on the Lineup tab; the Nightly tab passes one.
+    var onlyGame: Int? = nil
     @EnvironmentObject var week: WeekStore
     @EnvironmentObject var directory: PlayerDirectory
     @Environment(\.dismiss) private var dismiss
@@ -14,6 +16,9 @@ struct PlayerDetailView: View {
     /// Games already fetched after going final, so a finished game isn't fetched again.
     @State private var finalLoaded: Set<String> = []
 
+    /// The games this sheet covers, newest first.
+    private var gameIndexes: [Int] { onlyGame.map { [$0] } ?? [1, 0] }
+
     /// One of his two counting games, once it has started (live or final).
     private func startedLine(_ g: Int) -> GameLine? {
         guard let line = week.results?.line(for: player.id, game: g), line.state != .scheduled else { return nil }
@@ -22,7 +27,7 @@ struct PlayerDetailView: View {
 
     /// Changes when a game starts, or goes from live to final, which restarts the box score task.
     private var boxTaskKey: String {
-        (0..<2).map { g in startedLine(g).map { "\($0.eventID)-\($0.state)" } ?? "-" }.joined(separator: "|")
+        gameIndexes.map { g in startedLine(g).map { "\($0.eventID)-\($0.state)" } ?? "-" }.joined(separator: "|")
     }
 
     var body: some View {
@@ -61,14 +66,14 @@ struct PlayerDetailView: View {
                 }
 
                 // Newest first. Each game is followed by its own box score.
-                gameSection(1)
-                boxScoreSection(1)
-                gameSection(0)
-                boxScoreSection(0)
+                ForEach(gameIndexes, id: \.self) { g in
+                    gameSection(g)
+                    boxScoreSection(g)
+                }
 
                 RecentFormSection(athleteID: player.espnID, fallback: { week.savedGames(for: player.id) })
 
-                if let total = week.results?.playerTotal(player.id) {
+                if onlyGame == nil, let total = week.results?.playerTotal(player.id) {
                     Section("This week") {
                         HStack {
                             Text("Points counted")
@@ -202,7 +207,7 @@ struct PlayerDetailView: View {
     /// 20 seconds (one ESPN call per live game) until it ends. Stops by itself when the sheet closes.
     private func loadBoxes() async {
         while !Task.isCancelled {
-            let lines = (0..<2).compactMap { startedLine($0) }
+            let lines = gameIndexes.compactMap { startedLine($0) }
             let anyLive = lines.contains { $0.state == .live }
             let finalIDs = Set(lines.filter { $0.state == .final }.map { $0.eventID })
             let toFetch = Set(lines.filter { $0.state == .live || !finalLoaded.contains($0.eventID) }.map { $0.eventID })
