@@ -40,7 +40,8 @@ enum ET {
 enum DateParsing {
     /// ESPN dates look like "2026-10-21T23:30Z" (no seconds), or "2026-10-17T02:30:00.000+00:00" in the game log.
     static func parse(_ s: String) -> Date? {
-        let patterns = ["yyyy-MM-dd'T'HH:mm'Z'", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"]
+        let patterns = ["yyyy-MM-dd'T'HH:mm'Z'", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                        "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX", "yyyy-MM-dd'T'HH:mm:ssXXXXX"]
         for p in patterns {
             let f = DateFormatter()
             f.locale = Locale(identifier: "en_US_POSIX")
