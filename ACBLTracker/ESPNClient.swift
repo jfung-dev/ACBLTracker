@@ -392,10 +392,23 @@ actor ESPNClient {
 
     // MARK: Recent games
 
-    /// A player's last five games this season, newest first. Cached for five minutes.
+    /// A player's last five games this season, newest first. Cached for five minutes. Empty when ESPN has no log for him.
+    /// Throws on a network or decoding failure, so callers can tell "no games" from "couldn't load".
     func gameLog(athleteID: String) async throws -> [RecentGame] {
         if let hit = gameLogCache[athleteID], Date().timeIntervalSince(hit.fetched) < 300 { return hit.games }
-        let r = try await loadGameLog(athleteID: athleteID)
+        let r: GameLogResponse
+        do {
+            r = try await loadGameLog(athleteID: athleteID)
+        } catch ClientError.notFound {
+            return []
+        }
+        let games = Self.recentGames(from: r)
+        gameLogCache[athleteID] = (Date(), games)
+        return games
+    }
+
+    /// The five newest games in a game log response.
+    private static func recentGames(from r: GameLogResponse) -> [RecentGame] {
         let names = r.names ?? []
         let labels = (r.labels ?? []).map { $0.uppercased() }
         func idx(_ name: String, _ label: String) -> Int? { names.firstIndex(of: name) ?? labels.firstIndex(of: label) }
@@ -441,9 +454,7 @@ actor ESPNClient {
             }
         }
         out.sort { $0.date > $1.date }
-        let games = Array(out.prefix(5))
-        gameLogCache[athleteID] = (Date(), games)
-        return games
+        return Array(out.prefix(5))
     }
 
     /// This season's game log for a player. Throws `.notFound` when ESPN has no log for him (nobody who hasn't played).
@@ -469,6 +480,8 @@ actor ESPNClient {
         } catch ClientError.notFound {
             return PlayerAverage(ppg: 0, games: 0)
         }
+        // Same response as the Recent Form section needs, so opening a player's sheet doesn't fetch it again.
+        if !previousSeason { gameLogCache[athleteID] = (Date(), Self.recentGames(from: r)) }
         let names = r.names ?? []
         let labels = (r.labels ?? []).map { $0.uppercased() }
         guard let ptsI = names.firstIndex(of: "points") ?? labels.firstIndex(of: "PTS") else {

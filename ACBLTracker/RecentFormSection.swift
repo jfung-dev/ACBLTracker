@@ -9,6 +9,7 @@ struct RecentFormSection: View {
     var fallback: () -> [RecentGame] = { [] }
 
     @State private var recent: [RecentGame]?
+    @State private var failed = false
 
     var body: some View {
         Section {
@@ -17,6 +18,12 @@ struct RecentFormSection: View {
                     Text("No games played yet this season").foregroundStyle(.secondary)
                 } else {
                     ForEach(recent) { recentRow($0) }
+                }
+            } else if failed {
+                HStack {
+                    Text("Couldn't load recent games").foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Retry") { Task { await load() } }.buttonStyle(.borderless)
                 }
             } else {
                 HStack(spacing: 8) {
@@ -35,13 +42,26 @@ struct RecentFormSection: View {
     }
 
     private func load() async {
+        failed = false
         var games: [RecentGame] = []
+        var loadError = false
         if let id = athleteID {
-            games = (try? await ESPNClient.shared.gameLog(athleteID: id)) ?? []
+            do {
+                games = try await ESPNClient.shared.gameLog(athleteID: id)
+            } catch {
+                // A cancelled task (sheet closing, view refresh) isn't a failure and shouldn't leave "no games" behind.
+                if Task.isCancelled || (error as? URLError)?.code == .cancelled { return }
+                loadError = true
+            }
         }
         // ESPN's game log can lag early in the season; fall back to games already saved in this app.
         if games.isEmpty { games = fallback() }
-        recent = games
+        if games.isEmpty && loadError {
+            failed = true
+            recent = nil
+        } else {
+            recent = games
+        }
     }
 
     private var averageText: String? {
