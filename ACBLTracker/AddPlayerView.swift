@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Confirmation sheet when you tap a search result: pick the league position, see where he'll land, add.
+/// Confirmation sheet when you tap a search result or a free agent: his recent form, pick the league position, see where he'll land, add.
 struct AddPlayerView: View {
     let player: DirectoryPlayer
     var onDone: () -> Void = {}
@@ -33,6 +33,8 @@ struct AddPlayerView: View {
                     }
                     .padding(.vertical, 4)
                 }
+
+                RecentFormSection(athleteID: player.id)
 
                 Section {
                     Picker("Position", selection: $position) {
