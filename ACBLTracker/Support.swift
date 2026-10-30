@@ -38,7 +38,7 @@ enum ET {
 }
 
 enum DateParsing {
-    /// ESPN dates look like "2026-10-21T23:30Z" (no seconds).
+    /// ESPN dates look like "2026-10-21T23:30Z" (no seconds), or "2026-10-17T02:30:00.000+00:00" in the game log.
     static func parse(_ s: String) -> Date? {
         let patterns = ["yyyy-MM-dd'T'HH:mm'Z'", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"]
         for p in patterns {
@@ -48,6 +48,9 @@ enum DateParsing {
             f.dateFormat = p
             if let d = f.date(from: s) { return d }
         }
+        let fractional = ISO8601DateFormatter()
+        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let d = fractional.date(from: s) { return d }
         return ISO8601DateFormatter().date(from: s)
     }
 
